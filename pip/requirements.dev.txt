@@ -1,0 +1,12 @@
+## -----------------------------------------------------------------------------
+## Development App libraries
+## -----------------------------------------------------------------------------
+
+# Debug toolbar -> https://github.com/jazzband/django-debug-toolbar
+django-debug-toolbar
+
+# Get package license -> https://github.com/raimon49/pip-licenses
+pip-licenses
+
+
+

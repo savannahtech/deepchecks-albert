@@ -1,0 +1,84 @@
+## -----------------------------------------------------------------------------
+## App libraries
+##
+## Check outdated libraries:
+##
+##     pip list --outdated
+## -----------------------------------------------------------------------------
+
+
+
+# Django framework -> https://github.com/django/django
+django<5
+
+
+# ORM cache -> https://github.com/Suor/django-cacheops
+django-cacheops
+
+# Simple color field -> https://github.com/fabiocaccamo/django-colorfield
+django-colorfield
+
+
+# Python i18n and L9n library -> https://github.com/python-babel/babel
+babel
+
+# CORS checking -> https://github.com/ottoyiu/django-cors-headers
+django-cors-headers
+
+# Include with decorators -> https://github.com/twidi/django-decorator-include
+django-decorator-include
+
+# Captures the current request and user -> https://github.com/ninemoreminutes/django-crum/
+django-crum
+
+# Django extra settings -> https://github.com/fabiocaccamo/django-extra-settings
+django-extra-settings
+
+# Extended DRF Filters -> https://github.com/carltongibson/django-filter
+django-filter
+
+# Library for importing and exporting data -> https://github.com/django-import-export/django-import-export
+# Avoid breaking changes in django-import-export 4 (Export fields are tuple, all
+# exported records including integer and None are stringified)
+django-import-export<4
+
+
+# Json Formatter for logger -> https://github.com/madzak/python-json-logger
+python-json-logger
+
+
+
+
+# https://github.com/un1t/django-cleanup
+django-cleanup
+
+
+
+
+
+# Django REST Framework -> https://github.com/encode/django-rest-framework
+djangorestframework
+
+# DRF Flexible fields -> https://github.com/rsinger86/drf-flex-fields
+drf-flex-fields
+
+# OpenAPI 3.0 schema generator -> https://github.com/tfranzel/drf-spectacular
+drf-spectacular[sidecar]
+
+# FontAwesome -> https://github.com/FortAwesome/Font-Awesome
+fontawesomefree
+
+# Implementation of Markdown -> https://github.com/Python-Markdown/markdown
+markdown
+
+# Pillow (PIL fork) -> https://github.com/python-pillow/Pillow https://python-pillow.org
+pillow
+
+# [Django >= 4] Python-PostgreSQL -> https://github.com/psycopg/psycopg
+psycopg[binary,pool]
+
+gunicorn
+
+celery[redis]
+
+

@@ -1,0 +1,123 @@
+volumes:
+  db_data:
+    name: deepcheck_db_data
+  static_data:
+    name: deepcheck_static_data
+  media_data:
+    name: deepcheck_media_data
+  worker_data:
+    name: deepcheck_worker_data
+
+services:
+  db:
+    image: postgres:16-alpine
+    hostname: postgres
+    environment:
+      POSTGRES_USER: ${APP_PGUSER}
+      POSTGRES_PASSWORD: ${APP_PGPASSWORD}
+      PGUSER: ${APP_PGUSER}
+      PGPASSWORD: ${APP_PGPASSWORD}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: pg_isready
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  redis:
+    restart: unless-stopped
+    image: redis:alpine
+    expose:
+      - 6379
+
+  nginx:
+    image: nginx:alpine
+    environment:
+      APP_HOST: app
+      APP_PORT: 8000
+
+    volumes:
+      # local setup
+      - ./conf/local/nginx.conf.template:/etc/nginx/templates/default.conf.template
+      # static folder
+      - static_data:/var/www/static
+
+    ports:
+      - 80:80
+    healthcheck:
+      test: nginx -t
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  app:
+    image: deepcheck
+    build:
+      context: .
+      dockerfile: Dockerfile
+    stdin_open: true
+    tty: true
+    environment:
+      # Database settings
+      PGHOST: ${APP_PGHOST:-db}
+      PGPORT: ${APP_PGPORT:-5432}
+      PGUSER: ${APP_PGUSER}
+      PGPASSWORD: ${APP_PGPASSWORD}
+      DB_NAME: ${APP_DB_NAME}
+      # Django settings
+      ADMIN_PASSWORD: ${APP_ADMIN_PASSWORD}
+      DJANGO_HTTP_ENABLED: "yes"
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-}
+      LOGGING_FORMATTER: verbose
+
+      CELERY_BROKER_URL: "redis://redis:6379/0"
+      CELERY_RESULT_BACKEND: "redis://redis:6379/0"
+
+      # Local settings
+      PYTHONPYCACHEPREFIX: "/var/tmp/cache/cpython/"
+      DEBUG_TOOLBAR_ENABLED: ${DEBUG_TOOLBAR_ENABLED:-}
+      FAIL_FAST: ${FAIL_FAST:-}
+    volumes:
+      - ./app/:/code/
+      # static content
+      - static_data:/var/www/static
+
+      # - media_data:/var/www/media
+    depends_on:
+      - db
+      - nginx
+      - redis
+
+  worker:
+    # restart: unless-stopped
+    build:
+      context: .
+      dockerfile: Dockerfile
+    entrypoint: /code/app/worker-entrypoint.sh
+    volumes:
+      - static_data:/var/www/static
+    environment:
+      CELERY_BROKER_URL: "redis://redis:6379/0"
+      CELERY_RESULT_BACKEND: "redis://redis:6379/0"
+
+      # Django settings
+      ADMIN_PASSWORD: ${APP_ADMIN_PASSWORD}
+      DJANGO_HTTP_ENABLED: "yes"
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-}
+      LOGGING_FORMATTER: verbose
+
+      # Database settings
+      PGHOST: ${APP_PGHOST:-db}
+      PGPORT: ${APP_PGPORT:-5432}
+      PGUSER: ${APP_PGUSER}
+      PGPASSWORD: ${APP_PGPASSWORD}
+      DB_NAME: ${APP_DB_NAME}
+
+      # Local settings
+      PYTHONPYCACHEPREFIX: "/var/tmp/cache/cpython/"
+      DEBUG_TOOLBAR_ENABLED: ${DEBUG_TOOLBAR_ENABLED:-}
+      FAIL_FAST: ${FAIL_FAST:-}
+    depends_on:
+      - app
+      - redis
